@@ -104,7 +104,7 @@ Komponenta \textit{crce-webui} obsahovala silnou závislost na komponentě \text
 
 Po dohodě s vyučujícím jsme tuto závislost nahradili slabou závislostí -- konstanty stejného typu jsme dodefinovali i v komponentě \textit{crce-webui}. Silná závislost byla odstraněna, nicméně pokud se v budoucnu změní komponenta \textit{crce-metadata-osgi-bundle}, bude nutné kontrolovat, zda změna neovlivnila \textit{crce-webui} a případné nesrovnalosti opravit.
 
-Aby bylo podobným závislostem v budoucnosti zamezeno, rozhraní indexeru bylo rozšířeno o metodu, která vrací elementy, jež je indexer schopen detekovat. V rámci této práce byla vytvořena defaultní implementace této vlastnosti v AbstractIndexer, která vrací pouze prázdný seznam. Projekt lze bezpečně přeložit, ale momentálně novou funkci rozhraní plně využívá jen OSGiIndexer.
+Aby bylo podobným závislostem v budoucnosti zamezeno, rozhraní indexeru bylo rozšířeno o metodu, která vrací elementy, jež je indexer schopen detekovat. V rámci této práce byla vytvořena výchozí implementace této vlastnosti v AbstractIndexer, která vrací pouze prázdný seznam. Projekt lze bezpečně přeložit, ale momentálně novou funkci rozhraní plně využívá jen OSGiIndexer.
 
 \begin{figure}[h!]
 \centering
@@ -119,7 +119,7 @@ Součástí příprav pro dockerizaci bylo přidání konfigurace připojení k 
 
 
 \section{Dockerizace projektu}
-Do modulu \textit{deploy} byl přidán Dockerfile, kterým je možné sestavit docker image obsahující spustitelnou verzi CRCE. Do takto spuštěného CRCE lze doinstalovávat nové OSGI komponenty a není nutné celý projekt znovu sestavovat. 
+Do modulu \textit{deploy} byl přidán Dockerfile, kterým je možné sestavit docker image obsahující spustitelnou verzi CRCE. Do takto spuštěného CRCE lze doinstalovávat nové OSGi komponenty a není nutné celý projekt znovu sestavovat. 
 
 Detaily o sestavení a spuštění docker image jsou v sekci \ref{sec:manual}
 
@@ -164,13 +164,13 @@ IP 172.17.0.1 je adresa, kterou docker přiřazuje hostovacímu stroji. Do adres
 
 Parametr \textit{-v} slouží k propojení adresáře na hostovacím stroj (\textit{/felix/deploy}) s adresářem uvnitř kontejneru (\textit{/felix/felix-framework-5.0.0/dist}). Do tohoto adresáře je možné kopírovat OSGi bundly a instalovat je v runtime.
 
-Před spuštěním docker image je třeba spustit instanci MongoDB. Není podstatné, zda bude spuštěna prostřednictvím Dockeru (např. image 3.4-jessie), lokálním stroji nebo na serveru. Jen je třeba před sestavením ověřit nastavení connection string. Není připravena konfigurace docker-compose, protože se nám v rámci konfigurace a testů nepodařilo zprovoznit GoGo shell při použití compose mechanismu, uživatel by byl ochuzen o diagnostické možnosti OSGi runtime.
+Před spuštěním docker image je třeba spustit instanci MongoDB. Není podstatné, zda bude spuštěna prostřednictvím Dockeru (např. image 3.4-jessie), lokálním stroji nebo na serveru. Jen je třeba před sestavením ověřit nastavení connection string. Není připravena konfigurace docker-compose, protože se nám v rámci konfigurace a testů nepodařilo zprovoznit GoGo shell při použití compose mechanismu, z toho důvodu by uživatel byl ochuzen o diagnostické možnosti OSGi runtime.
 
 
 \subsection{Možné problémy při spuštění}
 Pokud není spuštěný docker daemon, nebo současný uživatel není ve skupině \textit{docker}, může příkaz \verb|docker run| vyžadovat spuštění pod rootem \footnote{Kroky po nainstalování dockeru: https://docs.docker.com/install/linux/linux-postinstall/}.
 
-V případě, že by IP 172.17.0.1 nefungovala, je potřeba zjistit pod jakou adresou vidí docker hostovací stroj. Ve výchozím nastavení vytvoří docker síťový most \verb|docker0| mezi imagem a hostovacím strojem. Detaily mostu lze zobrazit příkazem: 
+V případě, že by IP 172.17.0.1 nefungovala, je potřeba zjistit pod jakou adresou vidí docker hostující stroj. Ve výchozím nastavení vytvoří docker síťový most \verb|docker0| mezi imagem a hostujícím strojem. Detaily mostu lze zobrazit příkazem: 
 
 \begin{verbatim}
 sudo ip addr show docker0
