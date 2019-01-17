@@ -152,15 +152,17 @@ Výsledný image obsahuje distribuci Apache Felix 5.0.0, JDK 1.7 a všechny OSGI
 docker run -it \ 
 	   -p 8080:8080 \
 	   --add-host mongoserver:172.17.0.1 \
-	   -v /felix/deploy:/felix/deploy \
+	   -v /felix/deploy:/felix/felix-framework-5.0.0/dist \
 	   crce-docker 
 \end{verbatim}
 
 Parametry \textit{-it} spustí image s v interaktivním módu a přesměrují o něj STDIN. Tím je možné používat interaktivní GoGo shell. Pokud budou tyto parametry vynechány, GoGo shell nebude schopný detekovat žádný vstup a automaticky vypne běžící Felix.
 
-Parametr \textit{add-host} slouží k přidání záznamu do /etc/hosts v kontejneru a image se pak může k databázi běžící na hostovacím stroji dostat pomocí hostname \textit{mongoserver}. 
+Parametr \textit{--add-host} slouží k přidání záznamu do /etc/hosts v kontejneru a image se pak může k databázi běžící na hostovacím stroji dostat pomocí hostname \textit{mongoserver}. 
 
 IP 172.17.0.1 je adresa, kterou docker přiřazuje hostovacímu stroji. Do adresáře \textit{/felix/deploy} na hostovacím stroji je možné vložit OSGI bundly a ty následně nainstalovat a spustit skrze Gogo shell. K běžící instanci je možné přistoupit na adrese \textit{http://localhost:8080/crce}. 
+
+Parametr \textit{-v} slouží k propojení adresáře na hostovacím stroj (\textit{/felix/deploy}) s adresářem uvnitř kontejneru (\textit{/felix/felix-framework-5.0.0/dist}). Do tohoto adresáře je možné kopírovat OSGi bundly a instalovat je v runtime.
 
 Před spuštěním docker image je třeba spustit instanci MongoDB. Není podstatné, zda bude spuštěna prostřednictvím Dockeru (např. image 3.4-jessie), lokálním stroji nebo na serveru. Jen je třeba před sestavením ověřit nastavení connection string. Není připravena konfigurace docker-compose, protože se nám v rámci konfigurace a testů nepodařilo zprovoznit GoGo shell při použití compose mechanismu, uživatel by byl ochuzen o diagnostické možnosti OSGi runtime.
 

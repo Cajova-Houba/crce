@@ -47,7 +47,7 @@ To run docker image run following command:
 docker run -it \ 
 	   -p 8080:8080 \ 
 	   --add-host mongoserver:172.17.0.1 \ 
-	   -v /felix/deploy:/felix/deploy \
+	   -v /felix/deploy:/felix/felix-framework-5.0.0/dist \
 	   crce-docker 
 ```
 
