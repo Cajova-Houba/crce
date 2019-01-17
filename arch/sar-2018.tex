@@ -67,7 +67,7 @@ Celý projekt je rozdělen do čtyř hlavních modulů: sdílené nastavení ses
 
 Během analýzy modulu pro moduly CRCE jsme identifikovali několik kandidátů na přesun do jádra. Za kandidáty jsme volili takové komponenty, které využívá velká část ostatních modulů a zároveň tyto moduly mají závislosti do jádra. Komponenta webového rozhraní (\texttt{crce-webui}) tomuto pravidlu sice odporuje, představuje ale základní komponentu, bez které by úložiště nešlo použít. Přesouvané komponenty jsou: \texttt{crce-compatibility-api}, \texttt{crce-webui}, \texttt{crce-concurrency} (graficky znázorněno na Obrázku \ref{fig:modulesCRCE}). 
 
-Po identifikace kandidátů jsme z přesunu vyřadili komponentu metadata-osgi-bundle, kvůli nedostatečné obecnosti. Komponenta je schopna indexovat pouze OSGI komponenty -- přesun do jádra by byl možný, pokud by uměla indexovat obecné JAR. Komponenta \texttt{crce-webui} bohužel obsahuje silnou závislost na této komponentě, která brání přesunu \texttt{crce-webui} do jádra. Závislost spočívá v použití několika konstant, které jsou v definované v metadata-osgi-bundle. Navrhli jsme tedy přidání metody do rozhraní indexeru pro zjištění jaké elementy indexer zpracovává a silnou závislost jsme nahradili slabou závislostí.
+Po identifikaci kandidátů jsme z přesunu vyřadili komponentu metadata-osgi-bundle, kvůli nedostatečné obecnosti. Komponenta je schopna indexovat pouze OSGI komponenty -- přesun do jádra by byl možný, pokud by uměla indexovat obecné JAR. Komponenta \texttt{crce-webui} bohužel obsahuje silnou závislost na této komponentě, která brání přesunu \texttt{crce-webui} do jádra. Závislost spočívá v použití několika konstant, které jsou v definované v metadata-osgi-bundle. Navrhli jsme tedy přidání metody do rozhraní indexeru pro zjištění jaké elementy indexer zpracovává a silnou závislost jsme nahradili slabou závislostí.
 
 \begin{figure}[h!]
 \centering
@@ -90,7 +90,7 @@ Do kořene CRCE byl přidán nový modul \textit{deploy}, do kterého byla přes
 
 Nově přidaná komponenta \textit{crce-default-modules} tedy slouží jako agregátor komponent z modulu \textit{modules}, které mají být použité ve výsledné distribuci.
 
-V rámci přípravy modulu pro sestavení a spuštění byla povýšena verze Felix na 5.0.0. Starší verze způsobovala problémy se spuštěním interaktivního shellu při spuštění pomocí Dockeru.
+V rámci přípravy modulu pro sestavení a spuštění byl přidán Docker image obsahující JDK 1.7 a Apache Felix verze 5.0.0.
 
 \subsection{Přesun vybraných modulů do jádra}
 Do jádra byly z modulu \textit{modules} přesunuty komponenty: \textit{crce-compatibility-api}, \textit{crce-webui} a \textit{crce-concurrency}. V případě \textit{crce-webui} bylo nutné odstranit závislost na \textit{crce-core} (jinak by se jednalo o kruhovou závislost) a nahradit ji jednotlivými závislostmi na vybraných komponentách z jádra.
@@ -121,14 +121,15 @@ Součástí příprav pro dockerizaci bylo přidání konfigurace připojení k 
 \section{Dockerizace projektu}
 Do modulu \textit{deploy} byl přidán Dockerfile, kterým je možné sestavit docker image obsahující spustitelnou verzi CRCE. Do takto spuštěného CRCE lze doinstalovávat nové OSGI komponenty a není nutné celý projekt znovu sestavovat. 
 
+Detaily o sestavení a spuštění docker image jsou v sekci \ref{sec:manual}
 
-
 %========================================
 %========================================
 %========================================
 %========================================
 %========================================
-\section{Uživatelská~příručka} %======================================================================================
+\section{Uživatelská~příručka}
+\label{sec:manual} %======================================================================================
 
 Provedené změny ovlivnily základní používání projektu při vývoji. 
 
@@ -143,6 +144,8 @@ K sestavení Docker image je možné použít Dockerfile, který se nachází v 
 docker build . -t crce-docker
 \end{verbatim} 
 
+\subsection{Spuštění docker image}
+
 Výsledný image obsahuje distribuci Apache Felix 5.0.0, JDK 1.7 a všechny OSGI bundly z CRCE. Spuštění lze provést příkazem:
 
 \begin{verbatim}
@@ -153,9 +156,25 @@ docker run -it \
 	   crce-docker 
 \end{verbatim}
 
-Parametr \textit{add-host} slouží k přidání záznamu do /etc/hosts v kontejneru a image se pak může k databázi běžící na hostovacím stroji dostat pomocí hostname \textit{mongoserver}. IP adresa 172.17.0.1 je adresa, kterou docker přiřazuje hostovacímu stroji. Do adresáře \textit{/felix/deploy} na hostovacím stroji je možné vložit OSGI bundly a ty následně nainstalovat a spustit skrze Gogo shell. K běžící instanci je možné přistoupit na adrese \textit{http://localhost:8080/crce}.
+Parametry \textit{-it} spustí image s v interaktivním módu a přesměrují o něj STDIN. Tím je možné používat interaktivní GoGo shell. Pokud budou tyto parametry vynechány, GoGo shell nebude schopný detekovat žádný vstup a automaticky vypne běžící Felix.
+
+Parametr \textit{add-host} slouží k přidání záznamu do /etc/hosts v kontejneru a image se pak může k databázi běžící na hostovacím stroji dostat pomocí hostname \textit{mongoserver}. 
+
+IP 172.17.0.1 je adresa, kterou docker přiřazuje hostovacímu stroji. Do adresáře \textit{/felix/deploy} na hostovacím stroji je možné vložit OSGI bundly a ty následně nainstalovat a spustit skrze Gogo shell. K běžící instanci je možné přistoupit na adrese \textit{http://localhost:8080/crce}. 
 
 Před spuštěním docker image je třeba spustit instanci MongoDB. Není podstatné, zda bude spuštěna prostřednictvím Dockeru (např. image 3.4-jessie), lokálním stroji nebo na serveru. Jen je třeba před sestavením ověřit nastavení connection string. Není připravena konfigurace docker-compose, protože se nám v rámci konfigurace a testů nepodařilo zprovoznit GoGo shell při použití compose mechanismu, uživatel by byl ochuzen o diagnostické možnosti OSGi runtime.
+
+
+\subsection{Možné problémy při spuštění}
+Pokud není spuštěný docker daemon, nebo současný uživatel není ve skupině \textit{docker}, může příkaz \verb|docker run| vyžadovat spuštění pod rootem \footnote{Kroky po nainstalování dockeru: https://docs.docker.com/install/linux/linux-postinstall/}.
+
+V případě, že by IP 172.17.0.1 nefungovala, je potřeba zjistit pod jakou adresou vidí docker hostovací stroj. Ve výchozím nastavení vytvoří docker síťový most \verb|docker0| mezi imagem a hostovacím strojem. Detaily mostu lze zobrazit příkazem: 
+
+\begin{verbatim}
+sudo ip addr show docker0
+\end{verbatim}
+
+IP zobrazená ve výstupu příkazu je adresa, pod kterou docker container vidí hostovací stroj\footnote{Více detailů zde: https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-how-do-i-connect-to-the-localhost-of-the-mach}.
 
 %========================================
 %========================================

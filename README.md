@@ -29,16 +29,27 @@ On linux, step 3. can be perfomed via `.../third-party$ for d in * ; do cd $d ; 
 
 Build `crce-modules-reactor` in `/deploy`.
 
-For run in docker run command in `/deploy`:
-
-```docker build . -t crce-dock```
-
 For run on local machine run command in `/deploy`:
 
 Run CRCE using Maven plugin for pax in `crce-modules-reactor` module (i.e. `/deploy` directory):
 
 ```mvn pax:provision```
 
+### Docker
+
+To build docker image run following command in `/deploy`:
+
+```docker build . -t crce-docker```
+
+To run docker image run following command:
+
+```
+docker run -it \ 
+	   -p 8080:8080 \ 
+	   --add-host mongoserver:172.17.0.1 \ 
+	   -v /felix/deploy:/felix/deploy \
+	   crce-docker 
+```
 
 In both cases the output log should write up some info about dependencies terminated by lines similar to the following:
 
